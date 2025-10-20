@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 3.15)
 project(NotEnigma LANGUAGES CXX)
 
 if (MSVC)
+    # Make Release the default configuration when generating Visual Studio solutions so
+    # the binaries land in the expected Release directory unless the user explicitly
+    # selects another configuration.
+    set(CMAKE_CONFIGURATION_TYPES "Release;Debug;RelWithDebInfo;MinSizeRel" CACHE STRING "" FORCE)
+endif()
+
+if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+endif()
+
+if (MSVC)
     add_compile_options(/W4 /permissive- /DUNICODE /D_UNICODE)
 else()
     add_compile_options(-Wall -Wextra -pedantic)

@@ -1,12 +1,19 @@
 #include "ciphers.h"
 
 #include <algorithm>
+#include <chrono>
+#include <cstdio>
 #include <cwctype>
 #include <iostream>
 #include <locale>
 #include <random>
 #include <sstream>
 #include <string>
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 namespace
 {
@@ -90,10 +97,28 @@ namespace
         }
     }
 
+    std::mt19937& RandomEngine()
+    {
+        using Clock = std::chrono::steady_clock;
+        static thread_local std::mt19937 engine = [] {
+            try
+            {
+                std::random_device rd;
+                return std::mt19937(rd());
+            }
+            catch (...)
+            {
+                const auto seed = static_cast<unsigned int>(Clock::now().time_since_epoch().count());
+                return std::mt19937(seed);
+            }
+        }();
+        return engine;
+    }
+
     std::wstring GenerateRandomAlphabet()
     {
         std::wstring alphabet = NORMAL_ALPHABET;
-        static thread_local std::mt19937 engine(std::random_device{}());
+        auto& engine = RandomEngine();
         std::shuffle(alphabet.begin(), alphabet.end(), engine);
         return alphabet;
     }
@@ -222,6 +247,18 @@ int main()
     {
         std::cerr << "Error: " << ex.what() << '\n';
         return 1;
+    }
+
+#ifdef _WIN32
+    if (_isatty(_fileno(stdin)))
+#else
+    if (isatty(fileno(stdin)))
+#endif
+    {
+        std::wcout << L"\nPress Enter to exit...";
+        std::wcout.flush();
+        std::wstring discard;
+        std::getline(std::wcin, discard);
     }
 
     return 0;

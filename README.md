@@ -21,10 +21,12 @@ The console interface can be built on any platform with a C++17 toolchain:
 
 ```bash
 cmake -S . -B build -DNOT_ENIGMA_BUILD_GUI=OFF
-cmake --build build
+cmake --build build --config Release
 ```
 
-On Windows you can omit `-DNOT_ENIGMA_BUILD_GUI=OFF` to build both the GUI and console targets simultaneously.
+On Windows you can omit `-DNOT_ENIGMA_BUILD_GUI=OFF` to build both the GUI and console targets simultaneously. When using a
+single-configuration generator (such as Ninja on Linux/macOS), the `--config Release` flag is ignored and you can still select
+your preferred build type via `-DCMAKE_BUILD_TYPE`.
 
 ## Running the console application
 
@@ -83,8 +85,8 @@ Automated regression tests verify that Caesar, Vigenere, and Atbash encryption a
 
 ```bash
 cmake -S . -B build -DNOT_ENIGMA_BUILD_GUI=OFF
-cmake --build build
-ctest --test-dir build
+cmake --build build --config Release
+ctest --test-dir build -C Release
 ```
 
 The tests exercise well-known cipher examples (such as the classic "ATTACKATDAWN" Vigenere case) to confirm the implementations remain correct.
