@@ -34,7 +34,51 @@ After building, run the console interface from the build directory:
 ./NotEnigmaConsole
 ```
 
-Follow the prompts to choose a cipher, provide the relevant keyword or shift, and select the alphabet preset (normal, reverse, random, or a custom ordering). The result is printed directly to the terminal.
+Follow the prompts to choose a cipher, provide the relevant keyword or shift, and select the alphabet preset (normal, reverse, random, or a custom ordering). The result is printed directly to the terminal. For example:
+
+```
+$ ./NotEnigmaConsole
+Not Enigma Console
+===================
+
+Choose cipher:
+  1) Caesar
+  2) Vigenere
+  3) Atbash
+Selection: 1
+
+Choose action:
+  1) Encrypt
+  2) Decrypt
+Selection: 1
+
+Enter text: Hello World
+Enter shift value: 3
+
+Choose alphabet preset:
+  1) Normal (ABCDEFGHIJKLMNOPQRSTUVWXYZ)
+  2) Reverse (ZYXWVUTSRQPONMLKJIHGFEDCBA)
+  3) Random
+  4) Custom
+Selection: 1
+
+Result:
+Khoor Zruog
+```
+
+To decrypt, choose option **2** when prompted for the action or supply a negative shift value.
+
+## Testing cipher correctness
+
+Automated regression tests verify that Caesar, Vigenere, and Atbash encryption and decryption behave as expected. To build and run the test suite:
+
+```bash
+cmake -S . -B build -DNOT_ENIGMA_BUILD_GUI=OFF
+cmake --build build
+ctest --test-dir build
+```
+
+The tests exercise well-known cipher examples (such as the classic "ATTACKATDAWN" Vigenere case) to confirm the implementations remain correct.
 
 ## Notes
 

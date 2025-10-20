@@ -21,6 +21,17 @@ add_executable(NotEnigmaConsole
 target_link_libraries(NotEnigmaConsole PRIVATE NotEnigmaCiphers)
 target_compile_features(NotEnigmaConsole PRIVATE cxx_std_17)
 
+option(NOT_ENIGMA_BUILD_TESTS "Build console cipher tests" ON)
+if (NOT_ENIGMA_BUILD_TESTS)
+    enable_testing()
+    add_executable(NotEnigmaCipherTests
+        tests/cipher_tests.cpp
+    )
+    target_link_libraries(NotEnigmaCipherTests PRIVATE NotEnigmaCiphers)
+    target_compile_features(NotEnigmaCipherTests PRIVATE cxx_std_17)
+    add_test(NAME cipher_tests COMMAND NotEnigmaCipherTests)
+endif()
+
 option(NOT_ENIGMA_BUILD_GUI "Build the Win32 GUI application" ${WIN32})
 if (NOT_ENIGMA_BUILD_GUI)
     if (WIN32)
