@@ -79,21 +79,81 @@ namespace
         }
     }
 
-    bool ReadYesNo(const std::wstring& prompt)
+    std::wstring FilterLetters(const std::wstring& value)
+    {
+        std::wstring filtered;
+        filtered.reserve(value.size());
+        for (wchar_t ch : value)
+        {
+            if (std::iswalpha(ch))
+            {
+                filtered.push_back(ch);
+            }
+        }
+        return filtered;
+    }
+
+    std::wstring ReadLettersOnly(
+        const std::wstring& prompt,
+        const std::wstring& inputLabel,
+        bool allowEmpty)
     {
         while (true)
         {
-            std::wstring line = ReadLine(prompt);
-            std::transform(line.begin(), line.end(), line.begin(), [](wchar_t ch) { return static_cast<wchar_t>(std::towlower(ch)); });
-            if (line == L"y" || line == L"yes")
+            std::wstring value = ReadLine(prompt);
+            if (value.empty())
             {
-                return true;
+                if (allowEmpty)
+                {
+                    return value;
+                }
+
+                std::wcout << inputLabel << L" cannot be empty.\n";
+                continue;
             }
-            if (line == L"n" || line == L"no")
+
+            std::wstring invalid;
+            invalid.reserve(value.size());
+            for (wchar_t ch : value)
             {
-                return false;
+                if (!std::iswalpha(ch))
+                {
+                    invalid.push_back(ch);
+                }
             }
-            std::wcout << L"Please answer with 'y' or 'n'.\n";
+
+            if (!invalid.empty())
+            {
+                std::wcout << L"The following characters are not letters: " << invalid << L"\n";
+                const int action = ReadChoice(
+                    L"How would you like to proceed?\n"
+                    L"  1) Re-enter\n"
+                    L"  2) Remove invalid characters automatically\n\n"
+                    L"Selection: ",
+                    1, 2);
+
+                if (action == 1)
+                {
+                    continue;
+                }
+
+                std::wstring filtered = FilterLetters(value);
+                if (filtered.empty() && !allowEmpty)
+                {
+                    std::wcout << L"All characters would be removed. Please enter only letters.\n";
+                    continue;
+                }
+
+                value.swap(filtered);
+            }
+
+            if (!allowEmpty && value.empty())
+            {
+                std::wcout << inputLabel << L" cannot be empty.\n";
+                continue;
+            }
+
+            return value;
         }
     }
 
@@ -132,7 +192,7 @@ namespace
                 L"  1) Normal (ABCDEFGHIJKLMNOPQRSTUVWXYZ)\n"
                 L"  2) Reverse (ZYXWVUTSRQPONMLKJIHGFEDCBA)\n"
                 L"  3) Random\n"
-                L"  4) Custom\n"
+                L"  4) Custom\n\n"
                 L"Selection: ",
                 1, 4);
 
@@ -154,7 +214,10 @@ namespace
             }
             case 4:
             {
-                const std::wstring custom = ReadLine(L"Enter custom alphabet (leave empty to use default): ");
+                const std::wstring custom = ReadLettersOnly(
+                    L"Enter custom alphabet (leave empty to use default): ",
+                    L"Alphabet",
+                    /*allowEmpty*/ true);
                 if (custom.empty())
                 {
                     return NORMAL_ALPHABET;
@@ -167,14 +230,6 @@ namespace
         }
     }
 
-    std::wstring PromptOptionalAlphabet()
-    {
-        if (ReadYesNo(L"\nWould you like to provide a custom alphabet? (y/n): "))
-        {
-            return ReadLine(L"Enter alphabet characters: ");
-        }
-        return std::wstring();
-    }
 }
 
 int main()
@@ -190,19 +245,19 @@ int main()
             L"Choose cipher:\n"
             L"  1) Caesar\n"
             L"  2) Vigenere\n"
-            L"  3) Atbash\n"
+            L"  3) Atbash\n\n"
             L"Selection: ",
             1, 3);
 
         const int actionChoice = ReadChoice(
             L"\nChoose action:\n"
             L"  1) Encrypt\n"
-            L"  2) Decrypt\n"
+            L"  2) Decrypt\n\n"
             L"Selection: ",
             1, 2);
         const bool encrypt = actionChoice == 1;
 
-        const std::wstring input = ReadLine(L"\nEnter text: ");
+        const std::wstring input = ReadLettersOnly(L"\nEnter text: ", L"Text", /*allowEmpty*/ false);
 
         std::wstring output;
 
@@ -218,17 +273,8 @@ int main()
         }
         case 2: // Vigenere
         {
-            std::wstring keyword;
-            while (keyword.empty())
-            {
-                keyword = ReadLine(L"Enter keyword: ");
-                if (keyword.empty())
-                {
-                    std::wcout << L"Keyword cannot be empty.\n";
-                }
-            }
-            const std::wstring alphabet = PromptOptionalAlphabet();
-            output = not_enigma::ciphers::VigenereCipher(input, keyword, encrypt, alphabet);
+            const std::wstring keyword = ReadLettersOnly(L"Enter keyword: ", L"Keyword", /*allowEmpty*/ false);
+            output = not_enigma::ciphers::VigenereCipher(input, keyword, encrypt, std::wstring());
             break;
         }
         case 3: // Atbash

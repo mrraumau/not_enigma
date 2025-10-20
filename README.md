@@ -45,7 +45,7 @@ After building, run the console interface from the build directory:
   ./NotEnigmaConsole
   ```
 
-Follow the prompts to choose a cipher, provide the relevant keyword or shift, and select the alphabet preset (normal, reverse, random, or a custom ordering). The result is printed directly to the terminal. For example:
+Follow the prompts to choose a cipher, provide the relevant keyword or shift, and, for Caesar or Atbash, pick an alphabet preset (normal, reverse, random, or a custom ordering). If you enter non-letter characters when prompted for text, keywords, or alphabets, the console will offer to remove them automatically or let you re-enter the value. The result is printed directly to the terminal. For example:
 
 ```
 $ ./NotEnigmaConsole
@@ -56,14 +56,23 @@ Choose cipher:
   1) Caesar
   2) Vigenere
   3) Atbash
+
 Selection: 1
 
 Choose action:
   1) Encrypt
   2) Decrypt
+
 Selection: 1
 
-Enter text: Hello World
+Enter text: Hello World!
+The following characters are not letters:  !
+How would you like to proceed?
+  1) Re-enter
+  2) Remove invalid characters automatically
+
+Selection: 2
+
 Enter shift value: 3
 
 Choose alphabet preset:
@@ -71,10 +80,11 @@ Choose alphabet preset:
   2) Reverse (ZYXWVUTSRQPONMLKJIHGFEDCBA)
   3) Random
   4) Custom
+
 Selection: 1
 
 Result:
-Khoor Zruog
+KhoorZruog
 ```
 
 To decrypt, choose option **2** when prompted for the action or supply a negative shift value.
@@ -95,5 +105,5 @@ The tests exercise well-known cipher examples (such as the classic "ATTACKATDAWN
 
 - The Caesar cipher accepts positive or negative numeric shifts via the **Shift** field.
 - The keyword field is only available when the Vigenere cipher is selected. Characters not present in the active alphabet are ignored, and at least one valid character is required.
-- All ciphers use the alphabet field to define their working alphabet. Leave it empty to fall back to the standard English alphabet.
-- When Caesar or Atbash is active, use the **Alphabet Preset** drop-down to quickly choose the normal alphabet, its reverse, or generate a random alphabet containing all 26 unique Latin letters.
+- Caesar and Atbash expose alphabet presets (normal, reverse, or random). You can also provide a custom alphabet composed solely of letters; duplicates are removed automatically.
+- Non-letter characters entered into text, keyword, or alphabet prompts can either be stripped automatically or corrected manually when prompted.
