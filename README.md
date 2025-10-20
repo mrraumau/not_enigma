@@ -107,3 +107,13 @@ The tests exercise well-known cipher examples (such as the classic "ATTACKATDAWN
 - The keyword field is only available when the Vigenere cipher is selected. Characters not present in the active alphabet are ignored, and at least one valid character is required.
 - Caesar and Atbash expose alphabet presets (normal, reverse, or random). You can also provide a custom alphabet composed solely of letters; duplicates are removed automatically.
 - Non-letter characters entered into text, keyword, or alphabet prompts can either be stripped automatically or corrected manually when prompted.
+- The Win32 interface uses a warm beige palette; group boxes and text automatically adopt the theme while buttons retain their accessible system styling for clarity.
+
+## Customizing application icons
+
+The GUI build looks for optional artwork next to the executable. Drop your files inside an `assets` directory that lives beside `NotEnigma.exe` (or in the repository before building):
+
+- `assets/app_icon.ico` – becomes the window and taskbar icon. Use a multi-resolution `.ico` file that contains at least a 256×256 32-bit image; adding 128×128, 64×64, and 32×32 layers improves appearance on smaller displays.
+- `assets/panel_icon.bmp` – displayed in the top-left banner of the main window. Provide a square bitmap (96–128 pixels on a side works well) without transparency. Larger images up to 256×256 load at their native size.
+
+If a file is missing the application continues to run: the banner image is hidden and Windows falls back to the default executable icon. See [`assets/README.md`](assets/README.md) for a quick reference.

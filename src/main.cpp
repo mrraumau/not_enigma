@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -28,10 +29,18 @@ namespace
     };
 
     constexpr wchar_t NORMAL_ALPHABET[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    constexpr wchar_t PANEL_BITMAP_FILENAME[] = L"panel_icon.bmp";
+    constexpr wchar_t APP_ICON_FILENAME[] = L"app_icon.ico";
+
+    constexpr COLORREF TEXT_COLOR = RGB(74, 54, 38);
+    constexpr COLORREF BACKGROUND_COLOR = RGB(242, 233, 222);
 
     HFONT g_uiFont = nullptr;
     HFONT g_headingFont = nullptr;
     HBRUSH g_backgroundBrush = nullptr;
+    HBITMAP g_panelBitmap = nullptr;
+    HICON g_largeIcon = nullptr;
+    HICON g_smallIcon = nullptr;
 
     std::wstring GetWindowTextString(HWND hwnd)
     {
@@ -94,6 +103,36 @@ namespace
         }
     }
 
+    std::filesystem::path ExecutableDirectory()
+    {
+        std::wstring buffer(260, L'\0');
+        while (true)
+        {
+            const DWORD copied = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+            if (copied == 0)
+            {
+                return std::filesystem::current_path();
+            }
+            if (copied < buffer.size() - 1)
+            {
+                buffer.resize(copied);
+                break;
+            }
+            buffer.resize(buffer.size() * 2, L'\0');
+        }
+
+        std::filesystem::path exePath(buffer);
+        return exePath.parent_path();
+    }
+
+    std::filesystem::path AssetPath(const wchar_t* filename)
+    {
+        std::filesystem::path path = ExecutableDirectory();
+        path /= L"assets";
+        path /= filename;
+        return path;
+    }
+
     std::mt19937& RandomEngine()
     {
         using Clock = std::chrono::steady_clock;
@@ -118,6 +157,22 @@ namespace
         auto& engine = RandomEngine();
         std::shuffle(alphabet.begin(), alphabet.end(), engine);
         return alphabet;
+    }
+
+    HBITMAP LoadPanelBitmap()
+    {
+        const std::filesystem::path path = AssetPath(PANEL_BITMAP_FILENAME);
+        const HBITMAP bitmap = static_cast<HBITMAP>(LoadImageW(nullptr, path.c_str(), IMAGE_BITMAP,
+            0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION));
+        return bitmap;
+    }
+
+    HICON LoadIconFromAssets(int desiredSize)
+    {
+        const std::filesystem::path path = AssetPath(APP_ICON_FILENAME);
+        const HICON icon = static_cast<HICON>(LoadImageW(nullptr, path.c_str(), IMAGE_ICON,
+            desiredSize, desiredSize, LR_LOADFROMFILE));
+        return icon;
     }
 
     HFONT CreateUIFont(HWND hwnd, int pointSize, bool bold)
@@ -278,10 +333,26 @@ namespace
             }
             if (!g_backgroundBrush)
             {
-                g_backgroundBrush = CreateSolidBrush(RGB(246, 247, 251));
+                g_backgroundBrush = CreateSolidBrush(BACKGROUND_COLOR);
+            }
+            if (!g_panelBitmap)
+            {
+                g_panelBitmap = LoadPanelBitmap();
             }
 
             const int padding = 16;
+            const int panelIconSize = 72;
+            int paddingLeftWithIcon = padding;
+            if (g_panelBitmap)
+            {
+                HWND hwndPanelIcon = CreateWindowExW(0, L"STATIC", nullptr,
+                    WS_CHILD | WS_VISIBLE | SS_BITMAP,
+                    padding, padding, panelIconSize, panelIconSize,
+                    hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
+                SendMessageW(hwndPanelIcon, STM_SETIMAGE, IMAGE_BITMAP, reinterpret_cast<LPARAM>(g_panelBitmap));
+                paddingLeftWithIcon += panelIconSize + 12;
+            }
+
             const int groupInnerPadding = 14;
             const int labelHeight = 20;
             const int controlHeight = 28;
@@ -292,17 +363,19 @@ namespace
             const int buttonWidth = 110;
             const int buttonHeight = 34;
             const int columnSpacing = 24;
-            const int windowWidth = 900;
+            const int windowWidth = 940;
             const int leftColumnWidth = 320;
             const int rightColumnWidth = windowWidth - padding * 2 - leftColumnWidth - columnSpacing;
             const int headerWidth = windowWidth - padding * 2;
+            const int headerOffset = paddingLeftWithIcon - padding;
+            const int headerUsableWidth = headerWidth - headerOffset;
             const int leftColumnX = padding;
             const int rightColumnX = padding + leftColumnWidth + columnSpacing;
             int currentY = padding;
 
             HWND hwndTitle = CreateWindowExW(0, L"STATIC", L"Not Enigma Cipher Suite",
                 WS_CHILD | WS_VISIBLE | SS_LEFT,
-                padding, currentY, headerWidth, 32,
+                paddingLeftWithIcon, currentY, headerUsableWidth, 32,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndTitle, g_headingFont);
 
@@ -311,7 +384,7 @@ namespace
             HWND hwndDescription = CreateWindowExW(0, L"STATIC",
                 L"Explore classical substitution ciphers with customizable alphabets.",
                 WS_CHILD | WS_VISIBLE | SS_LEFT,
-                padding, currentY, headerWidth, 40,
+                paddingLeftWithIcon, currentY, headerUsableWidth, 40,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndDescription, g_uiFont);
 
@@ -565,6 +638,7 @@ namespace
         {
             HDC hdc = reinterpret_cast<HDC>(wParam);
             SetBkMode(hdc, TRANSPARENT);
+            SetTextColor(hdc, TEXT_COLOR);
             return reinterpret_cast<LRESULT>(g_backgroundBrush);
         }
         case WM_DESTROY:
@@ -583,6 +657,21 @@ namespace
                 DeleteObject(g_backgroundBrush);
                 g_backgroundBrush = nullptr;
             }
+            if (g_panelBitmap)
+            {
+                DeleteObject(g_panelBitmap);
+                g_panelBitmap = nullptr;
+            }
+            if (g_largeIcon)
+            {
+                DestroyIcon(g_largeIcon);
+                g_largeIcon = nullptr;
+            }
+            if (g_smallIcon)
+            {
+                DestroyIcon(g_smallIcon);
+                g_smallIcon = nullptr;
+            }
             PostQuitMessage(0);
             return 0;
         }
@@ -595,12 +684,24 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow)
 {
     const wchar_t CLASS_NAME[] = L"NotEnigmaWindowClass";
 
+    if (!g_largeIcon)
+    {
+        g_largeIcon = LoadIconFromAssets(0);
+    }
+    if (!g_smallIcon)
+    {
+        constexpr int smallIconSize = GetSystemMetrics(SM_CXSMICON);
+        g_smallIcon = LoadIconFromAssets(smallIconSize);
+    }
+
     WNDCLASSW wc = {};
     wc.lpfnWndProc = MainWndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = CLASS_NAME;
     wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
     wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+    wc.hIcon = g_largeIcon;
+    wc.hIconSm = g_smallIcon;
 
     if (!RegisterClassW(&wc))
     {
