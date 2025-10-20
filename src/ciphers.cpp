@@ -109,7 +109,7 @@ std::wstring VigenereCipher(const std::wstring& input, const std::wstring& key, 
 
     if (shifts.empty())
     {
-        throw std::invalid_argument("Vigenère key must contain characters from the alphabet.");
+        throw std::invalid_argument("Vigenere key must contain characters from the alphabet.");
     }
 
     std::wstring output;
