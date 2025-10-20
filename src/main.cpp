@@ -690,11 +690,12 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow)
     }
     if (!g_smallIcon)
     {
-        constexpr int smallIconSize = GetSystemMetrics(SM_CXSMICON);
+        const int smallIconSize = GetSystemMetrics(SM_CXSMICON);
         g_smallIcon = LoadIconFromAssets(smallIconSize);
     }
 
-    WNDCLASSW wc = {};
+    WNDCLASSEXW wc = {};
+    wc.cbSize = sizeof(WNDCLASSEXW);
     wc.lpfnWndProc = MainWndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = CLASS_NAME;
@@ -703,7 +704,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow)
     wc.hIcon = g_largeIcon;
     wc.hIconSm = g_smallIcon;
 
-    if (!RegisterClassW(&wc))
+    if (!RegisterClassExW(&wc))
     {
         MessageBoxW(nullptr, L"Failed to register window class.", L"Error", MB_ICONERROR | MB_OK);
         return 0;
