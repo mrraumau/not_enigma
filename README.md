@@ -1,6 +1,6 @@
 # Not Enigma
 
-A small Win32 desktop application that demonstrates classical substitution ciphers. The app lets you encrypt or decrypt text using the Caesar, Vigenere, and Atbash ciphers. Choose a cipher, provide the shift (for Caesar) or keyword (for Vigenere) when applicable, pick an alphabet ordering, then click **Encrypt** or **Decrypt** to see the transformed text.
+A small Win32 desktop application that demonstrates classical substitution ciphers. The app lets you encrypt or decrypt text using the Caesar, Vigenere, and Atbash ciphers. Choose a cipher, provide the shift (for Caesar) or keyword (for Vigenere) when applicable, pick an alphabet ordering, then click **Encrypt** or **Decrypt** to see the transformed text. A cross-platform console companion is also available for environments without the Win32 GUI.
 
 ## Building (Windows)
 
@@ -12,6 +12,29 @@ cmake --build build --config Release
 ```
 
 The resulting executable (`NotEnigma.exe`) will be located in `build/Release/`.
+
+To build only the GUI application, ensure the `NOT_ENIGMA_BUILD_GUI` option remains enabled (it is `ON` by default on Windows).
+
+## Console build
+
+The console interface can be built on any platform with a C++17 toolchain:
+
+```bash
+cmake -S . -B build -DNOT_ENIGMA_BUILD_GUI=OFF
+cmake --build build
+```
+
+On Windows you can omit `-DNOT_ENIGMA_BUILD_GUI=OFF` to build both the GUI and console targets simultaneously.
+
+## Running the console application
+
+After building, run the console interface from the build directory:
+
+```bash
+./NotEnigmaConsole
+```
+
+Follow the prompts to choose a cipher, provide the relevant keyword or shift, and select the alphabet preset (normal, reverse, random, or a custom ordering). The result is printed directly to the terminal.
 
 ## Notes
 
