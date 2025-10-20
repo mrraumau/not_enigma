@@ -30,9 +30,18 @@ On Windows you can omit `-DNOT_ENIGMA_BUILD_GUI=OFF` to build both the GUI and c
 
 After building, run the console interface from the build directory:
 
-```bash
-./NotEnigmaConsole
-```
+- **Windows (Command Prompt):**
+  ```
+  NotEnigmaConsole.exe
+  ```
+- **Windows (PowerShell):**
+  ```
+  .\NotEnigmaConsole.exe
+  ```
+- **macOS/Linux:**
+  ```bash
+  ./NotEnigmaConsole
+  ```
 
 Follow the prompts to choose a cipher, provide the relevant keyword or shift, and select the alphabet preset (normal, reverse, random, or a custom ordering). The result is printed directly to the terminal. For example:
 
