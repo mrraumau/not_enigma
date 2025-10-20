@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <windows.h>
 #include <algorithm>
 #include <chrono>
@@ -135,6 +136,11 @@ namespace
         {
             SendMessageW(hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(font), TRUE);
         }
+    }
+
+    HMENU ControlId(int id)
+    {
+        return reinterpret_cast<HMENU>(static_cast<INT_PTR>(id));
     }
 
     void UpdateControlStates(HWND hwndCombo,
@@ -335,7 +341,7 @@ namespace
             hwndCombo = CreateWindowExW(0, L"COMBOBOX", nullptr,
                 CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
                 innerX, groupY, 220, comboDropHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_COMBO_CIPHER), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_COMBO_CIPHER), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndCombo, g_uiFont);
 
             SendMessageW(hwndCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Caesar"));
@@ -354,7 +360,7 @@ namespace
             hwndKeyword = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
                 innerX, groupY, innerWidth, controlHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_EDIT_KEYWORD), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_EDIT_KEYWORD), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndKeyword, g_uiFont);
 
             groupY += controlHeight + sectionSpacing;
@@ -368,7 +374,7 @@ namespace
             hwndShift = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
                 innerX, groupY, 140, controlHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_EDIT_SHIFT), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_EDIT_SHIFT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndShift, g_uiFont);
 
             groupY += controlHeight + sectionSpacing;
@@ -382,7 +388,7 @@ namespace
             hwndAlphabetPreset = CreateWindowExW(0, L"COMBOBOX", nullptr,
                 CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
                 innerX, groupY, 220, comboDropHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_COMBO_ALPHABET_PRESET), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_COMBO_ALPHABET_PRESET), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndAlphabetPreset, g_uiFont);
 
             SendMessageW(hwndAlphabetPreset, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Normal"));
@@ -417,7 +423,7 @@ namespace
             hwndAlphabet = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
                 innerX, alphabetY, innerWidth, controlHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_EDIT_ALPHABET), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_EDIT_ALPHABET), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndAlphabet, g_uiFont);
             SetWindowTextString(hwndAlphabet, NORMAL_ALPHABET);
 
@@ -446,7 +452,7 @@ namespace
             hwndInput = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL,
                 messageInnerX, messageY, messageInnerWidth, editHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_EDIT_INPUT), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_EDIT_INPUT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndInput, g_uiFont);
 
             messageY += editHeight + sectionSpacing;
@@ -460,7 +466,7 @@ namespace
             hwndOutput = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL | ES_READONLY,
                 messageInnerX, messageY, messageInnerWidth, editHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_EDIT_OUTPUT), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_EDIT_OUTPUT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndOutput, g_uiFont);
 
             messageY += editHeight;
@@ -471,13 +477,13 @@ namespace
             HWND hwndEncrypt = CreateWindowExW(0, L"BUTTON", L"Encrypt",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP,
                 leftColumnX, leftY, buttonWidth, buttonHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_BTN_ENCRYPT), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_BTN_ENCRYPT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndEncrypt, g_uiFont);
 
             HWND hwndDecrypt = CreateWindowExW(0, L"BUTTON", L"Decrypt",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP,
                 leftColumnX + buttonWidth + 12, leftY, buttonWidth, buttonHeight,
-                hwnd, reinterpret_cast<HMENU>(ID_BTN_DECRYPT), GetModuleHandleW(nullptr), nullptr);
+                hwnd, ControlId(ID_BTN_DECRYPT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndDecrypt, g_uiFont);
 
             SetWindowTextString(hwndShift, L"3");
