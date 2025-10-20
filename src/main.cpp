@@ -150,17 +150,16 @@ namespace
 
         const BOOL enableKeyword = (type == CipherType::Vigenere);
         EnableWindow(hwndKeywordEdit, enableKeyword);
-        ShowWindow(hwndKeywordEdit, enableKeyword ? SW_SHOW : SW_HIDE);
-        ShowWindow(hwndKeywordLabel, enableKeyword ? SW_SHOW : SW_HIDE);
+        EnableWindow(hwndKeywordLabel, enableKeyword);
         const BOOL enableShift = (type == CipherType::Caesar);
         EnableWindow(hwndShiftEdit, enableShift);
-        ShowWindow(hwndShiftEdit, enableShift ? SW_SHOW : SW_HIDE);
-        ShowWindow(hwndShiftLabel, enableShift ? SW_SHOW : SW_HIDE);
+        EnableWindow(hwndShiftLabel, enableShift);
 
         const BOOL enablePreset = (type != CipherType::Vigenere);
         EnableWindow(hwndAlphabetPreset, enablePreset);
-        ShowWindow(hwndAlphabetPreset, enablePreset ? SW_SHOW : SW_HIDE);
-        ShowWindow(hwndAlphabetPresetLabel, enablePreset ? SW_SHOW : SW_HIDE);
+        EnableWindow(hwndAlphabetPresetLabel, enablePreset);
+        const BOOL enableAlphabet = (type != CipherType::Vigenere);
+        EnableWindow(hwndAlphabet, enableAlphabet);
         if (enablePreset)
         {
             if (SendMessageW(hwndAlphabetPreset, CB_GETCURSEL, 0, 0) == CB_ERR)
@@ -168,6 +167,10 @@ namespace
                 SendMessageW(hwndAlphabetPreset, CB_SETCURSEL, 0, 0);
                 SetWindowTextString(hwndAlphabet, NORMAL_ALPHABET);
             }
+        }
+        else
+        {
+            SetWindowTextString(hwndAlphabet, NORMAL_ALPHABET);
         }
     }
 
@@ -277,7 +280,7 @@ namespace
             const int labelHeight = 20;
             const int controlHeight = 28;
             const int comboDropHeight = 160;
-            const int editHeight = 150;
+            const int editHeight = 110;
             const int shortSpacing = 6;
             const int sectionSpacing = 18;
             const int buttonWidth = 110;
@@ -430,7 +433,7 @@ namespace
             messageY += labelHeight + shortSpacing;
 
             hwndInput = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL,
+                WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL,
                 innerX, messageY, innerWidth, editHeight,
                 hwnd, reinterpret_cast<HMENU>(ID_EDIT_INPUT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndInput, g_uiFont);
@@ -444,7 +447,7 @@ namespace
             messageY += labelHeight + shortSpacing;
 
             hwndOutput = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | ES_READONLY,
+                WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL | ES_READONLY,
                 innerX, messageY, innerWidth, editHeight,
                 hwnd, reinterpret_cast<HMENU>(ID_EDIT_OUTPUT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndOutput, g_uiFont);
@@ -574,9 +577,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow)
         return 0;
     }
 
+    const DWORD windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
     HWND hwnd = CreateWindowExW(0, CLASS_NAME, L"Not Enigma",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 700, 760,
+        windowStyle,
+        CW_USEDEFAULT, CW_USEDEFAULT, 700, 680,
         nullptr, nullptr, hInstance, nullptr);
 
     if (!hwnd)
