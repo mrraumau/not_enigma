@@ -285,13 +285,18 @@ namespace
             const int sectionSpacing = 18;
             const int buttonWidth = 110;
             const int buttonHeight = 34;
-            const int windowWidth = 640;
-            const int groupWidth = windowWidth - padding * 2;
+            const int columnSpacing = 24;
+            const int windowWidth = 900;
+            const int leftColumnWidth = 320;
+            const int rightColumnWidth = windowWidth - padding * 2 - leftColumnWidth - columnSpacing;
+            const int headerWidth = windowWidth - padding * 2;
+            const int leftColumnX = padding;
+            const int rightColumnX = padding + leftColumnWidth + columnSpacing;
             int currentY = padding;
 
             HWND hwndTitle = CreateWindowExW(0, L"STATIC", L"Not Enigma Cipher Suite",
                 WS_CHILD | WS_VISIBLE | SS_LEFT,
-                padding, currentY, groupWidth, 32,
+                padding, currentY, headerWidth, 32,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndTitle, g_headingFont);
 
@@ -300,21 +305,25 @@ namespace
             HWND hwndDescription = CreateWindowExW(0, L"STATIC",
                 L"Explore classical substitution ciphers with customizable alphabets.",
                 WS_CHILD | WS_VISIBLE | SS_LEFT,
-                padding, currentY, groupWidth, 40,
+                padding, currentY, headerWidth, 40,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndDescription, g_uiFont);
 
-            currentY += 36;
+            currentY += 44;
+
+            const int columnsTop = currentY;
+            int leftY = columnsTop;
+            int rightY = columnsTop;
 
             HWND hwndCipherGroup = CreateWindowExW(0, L"BUTTON", L"Cipher Options",
                 WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                padding, currentY, groupWidth, 220,
+                leftColumnX, leftY, leftColumnWidth, 240,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndCipherGroup, g_uiFont);
 
-            int groupY = currentY + 30;
-            const int innerX = padding + groupInnerPadding;
-            const int innerWidth = groupWidth - groupInnerPadding * 2;
+            int groupY = leftY + 30;
+            const int innerX = leftColumnX + groupInnerPadding;
+            const int innerWidth = leftColumnWidth - groupInnerPadding * 2;
             int groupContentBottom = groupY;
 
             HWND hwndCipherLabel = CreateWindowExW(0, L"STATIC", L"Cipher:", WS_CHILD | WS_VISIBLE,
@@ -384,17 +393,17 @@ namespace
             groupY += controlHeight;
             groupContentBottom = groupY;
 
-            const int cipherGroupHeight = (groupContentBottom - currentY) + groupInnerPadding;
-            SetWindowPos(hwndCipherGroup, nullptr, 0, 0, groupWidth, cipherGroupHeight, SWP_NOMOVE | SWP_NOZORDER);
-            currentY += cipherGroupHeight + sectionSpacing;
+            const int cipherGroupHeight = (groupContentBottom - leftY) + groupInnerPadding;
+            SetWindowPos(hwndCipherGroup, nullptr, 0, 0, leftColumnWidth, cipherGroupHeight, SWP_NOMOVE | SWP_NOZORDER);
+            leftY += cipherGroupHeight + sectionSpacing;
 
             HWND hwndAlphabetGroup = CreateWindowExW(0, L"BUTTON", L"Alphabet",
                 WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                padding, currentY, groupWidth, 160,
+                leftColumnX, leftY, leftColumnWidth, 160,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndAlphabetGroup, g_uiFont);
 
-            int alphabetY = currentY + 30;
+            int alphabetY = leftY + 30;
 
             HWND hwndAlphabetInfo = CreateWindowExW(0, L"STATIC",
                 L"Adjust the working alphabet or leave the default ordering.",
@@ -414,63 +423,79 @@ namespace
 
             alphabetY += controlHeight;
 
-            const int alphabetGroupHeight = (alphabetY - currentY) + groupInnerPadding;
-            SetWindowPos(hwndAlphabetGroup, nullptr, 0, 0, groupWidth, alphabetGroupHeight, SWP_NOMOVE | SWP_NOZORDER);
-            currentY += alphabetGroupHeight + sectionSpacing;
+            const int alphabetGroupHeight = (alphabetY - leftY) + groupInnerPadding;
+            SetWindowPos(hwndAlphabetGroup, nullptr, 0, 0, leftColumnWidth, alphabetGroupHeight, SWP_NOMOVE | SWP_NOZORDER);
+            leftY += alphabetGroupHeight + sectionSpacing;
 
             HWND hwndMessageGroup = CreateWindowExW(0, L"BUTTON", L"Message",
                 WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                padding, currentY, groupWidth, 2 * editHeight + 80,
+                rightColumnX, rightY, rightColumnWidth, 2 * editHeight + 80,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndMessageGroup, g_uiFont);
 
-            int messageY = currentY + 30;
+            int messageY = rightY + 30;
+            const int messageInnerX = rightColumnX + groupInnerPadding;
+            const int messageInnerWidth = rightColumnWidth - groupInnerPadding * 2;
 
             HWND hwndInputLabel = CreateWindowExW(0, L"STATIC", L"Input:", WS_CHILD | WS_VISIBLE,
-                innerX, messageY, 100, labelHeight,
+                messageInnerX, messageY, 100, labelHeight,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndInputLabel, g_uiFont);
             messageY += labelHeight + shortSpacing;
 
             hwndInput = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL,
-                innerX, messageY, innerWidth, editHeight,
+                messageInnerX, messageY, messageInnerWidth, editHeight,
                 hwnd, reinterpret_cast<HMENU>(ID_EDIT_INPUT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndInput, g_uiFont);
 
             messageY += editHeight + sectionSpacing;
 
             HWND hwndOutputLabel = CreateWindowExW(0, L"STATIC", L"Output:", WS_CHILD | WS_VISIBLE,
-                innerX, messageY, 100, labelHeight,
+                messageInnerX, messageY, 100, labelHeight,
                 hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndOutputLabel, g_uiFont);
             messageY += labelHeight + shortSpacing;
 
             hwndOutput = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL | ES_READONLY,
-                innerX, messageY, innerWidth, editHeight,
+                messageInnerX, messageY, messageInnerWidth, editHeight,
                 hwnd, reinterpret_cast<HMENU>(ID_EDIT_OUTPUT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndOutput, g_uiFont);
 
             messageY += editHeight;
-            const int messageGroupHeight = (messageY - currentY) + groupInnerPadding + 20;
-            SetWindowPos(hwndMessageGroup, nullptr, 0, 0, groupWidth, messageGroupHeight, SWP_NOMOVE | SWP_NOZORDER);
-            currentY += messageGroupHeight + sectionSpacing;
+            const int messageGroupHeight = (messageY - rightY) + groupInnerPadding + 20;
+            SetWindowPos(hwndMessageGroup, nullptr, 0, 0, rightColumnWidth, messageGroupHeight, SWP_NOMOVE | SWP_NOZORDER);
+            rightY += messageGroupHeight;
 
             HWND hwndEncrypt = CreateWindowExW(0, L"BUTTON", L"Encrypt",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-                padding, currentY, buttonWidth, buttonHeight,
+                leftColumnX, leftY, buttonWidth, buttonHeight,
                 hwnd, reinterpret_cast<HMENU>(ID_BTN_ENCRYPT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndEncrypt, g_uiFont);
 
             HWND hwndDecrypt = CreateWindowExW(0, L"BUTTON", L"Decrypt",
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-                padding + buttonWidth + 12, currentY, buttonWidth, buttonHeight,
+                leftColumnX + buttonWidth + 12, leftY, buttonWidth, buttonHeight,
                 hwnd, reinterpret_cast<HMENU>(ID_BTN_DECRYPT), GetModuleHandleW(nullptr), nullptr);
             ApplyFont(hwndDecrypt, g_uiFont);
 
             SetWindowTextString(hwndShift, L"3");
             UpdateControlStates(hwndCombo, hwndKeywordLabel, hwndKeyword, hwndShiftLabel, hwndShift, hwndAlphabetPresetLabel, hwndAlphabetPreset, hwndAlphabet);
+
+            const int leftColumnBottom = leftY + buttonHeight;
+            const int rightColumnBottom = rightY;
+            const int contentBottom = std::max(leftColumnBottom, rightColumnBottom);
+            const int desiredClientHeight = contentBottom + padding;
+            const int desiredClientWidth = windowWidth;
+
+            RECT rc = { 0, 0, desiredClientWidth, desiredClientHeight };
+            const DWORD style = static_cast<DWORD>(GetWindowLongPtrW(hwnd, GWL_STYLE));
+            const DWORD exStyle = static_cast<DWORD>(GetWindowLongPtrW(hwnd, GWL_EXSTYLE));
+            AdjustWindowRectEx(&rc, style, FALSE, exStyle);
+            const int adjustedWidth = rc.right - rc.left;
+            const int adjustedHeight = rc.bottom - rc.top;
+            SetWindowPos(hwnd, nullptr, 0, 0, adjustedWidth, adjustedHeight, SWP_NOMOVE | SWP_NOZORDER);
             break;
         }
         case WM_COMMAND:
@@ -580,7 +605,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow)
     const DWORD windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
     HWND hwnd = CreateWindowExW(0, CLASS_NAME, L"Not Enigma",
         windowStyle,
-        CW_USEDEFAULT, CW_USEDEFAULT, 700, 680,
+        CW_USEDEFAULT, CW_USEDEFAULT, 960, 640,
         nullptr, nullptr, hInstance, nullptr);
 
     if (!hwnd)
