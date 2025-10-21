@@ -1,1 +1,119 @@
-# not_enigma
+# Not Enigma
+
+A small Win32 desktop application that demonstrates classical substitution ciphers. The app lets you encrypt or decrypt text using the Caesar, Vigenere, and Atbash ciphers. Choose a cipher, provide the shift (for Caesar) or keyword (for Vigenere) when applicable, pick an alphabet ordering, then click **Encrypt** or **Decrypt** to see the transformed text. A cross-platform console companion is also available for environments without the Win32 GUI.
+
+## Building (Windows)
+
+This project uses CMake. From a Visual Studio Developer Command Prompt:
+
+```bash
+cmake -S . -B build
+cmake --build build --config Release
+```
+
+The resulting executable (`NotEnigma.exe`) will be located in `build/Release/`.
+
+To build only the GUI application, ensure the `NOT_ENIGMA_BUILD_GUI` option remains enabled (it is `ON` by default on Windows).
+
+## Console build
+
+The console interface can be built on any platform with a C++17 toolchain:
+
+```bash
+cmake -S . -B build -DNOT_ENIGMA_BUILD_GUI=OFF
+cmake --build build --config Release
+```
+
+On Windows you can omit `-DNOT_ENIGMA_BUILD_GUI=OFF` to build both the GUI and console targets simultaneously. When using a
+single-configuration generator (such as Ninja on Linux/macOS), the `--config Release` flag is ignored and you can still select
+your preferred build type via `-DCMAKE_BUILD_TYPE`.
+
+## Running the console application
+
+After building, run the console interface from the build directory:
+
+- **Windows (Command Prompt):**
+  ```
+  NotEnigmaConsole.exe
+  ```
+- **Windows (PowerShell):**
+  ```
+  .\NotEnigmaConsole.exe
+  ```
+- **macOS/Linux:**
+  ```bash
+  ./NotEnigmaConsole
+  ```
+
+Follow the prompts to choose a cipher, provide the relevant keyword or shift, and, for Caesar or Atbash, pick an alphabet preset (normal, reverse, random, or a custom ordering). If you enter non-letter characters when prompted for text, keywords, or alphabets, the console will offer to remove them automatically or let you re-enter the value. The result is printed directly to the terminal. For example:
+
+```
+$ ./NotEnigmaConsole
+Not Enigma Console
+===================
+
+Choose cipher:
+  1) Caesar
+  2) Vigenere
+  3) Atbash
+
+Selection: 1
+
+Choose action:
+  1) Encrypt
+  2) Decrypt
+
+Selection: 1
+
+Enter text: Hello World!
+The following characters are not letters:  !
+How would you like to proceed?
+  1) Re-enter
+  2) Remove invalid characters automatically
+
+Selection: 2
+
+Enter shift value: 3
+
+Choose alphabet preset:
+  1) Normal (ABCDEFGHIJKLMNOPQRSTUVWXYZ)
+  2) Reverse (ZYXWVUTSRQPONMLKJIHGFEDCBA)
+  3) Random
+  4) Custom
+
+Selection: 1
+
+Result:
+KhoorZruog
+```
+
+To decrypt, choose option **2** when prompted for the action or supply a negative shift value.
+
+## Testing cipher correctness
+
+Automated regression tests verify that Caesar, Vigenere, and Atbash encryption and decryption behave as expected. To build and run the test suite:
+
+```bash
+cmake -S . -B build -DNOT_ENIGMA_BUILD_GUI=OFF
+cmake --build build --config Release
+ctest --test-dir build -C Release
+```
+
+The tests exercise well-known cipher examples (such as the classic "ATTACKATDAWN" Vigenere case) to confirm the implementations remain correct.
+
+## Notes
+
+- The Caesar cipher accepts positive or negative numeric shifts via the **Shift** field.
+- The keyword field is only available when the Vigenere cipher is selected. Characters not present in the active alphabet are ignored, and at least one valid character is required.
+- Caesar and Atbash expose alphabet presets (normal, reverse, or random). You can also provide a custom alphabet composed solely of letters; duplicates are removed automatically.
+- Non-letter characters entered into text, keyword, or alphabet prompts can either be stripped automatically or corrected manually when prompted.
+- The Win32 interface uses a warm beige palette; group boxes and text automatically adopt the theme while buttons retain their accessible system styling for clarity.
+
+## Customizing application icons
+
+The GUI build looks for optional artwork next to the executable. Drop your files inside an `assets` directory that lives beside `NotEnigma.exe` (or in the repository before building):
+
+- `assets/app_icon.ico` – becomes the window and taskbar icon. Use a multi-resolution `.ico` file that contains at least a 256×256 32-bit image; adding 128×128, 64×64, and 32×32 layers improves appearance on smaller displays.
+- `assets/panel_icon.bmp` – displayed in the top-left banner of the main window. Provide a square bitmap (96–128 pixels on a side works well) without transparency. Larger images up to 256×256 load at their native size.
+
+If a file is missing the application continues to run: the banner image is hidden and Windows falls back to the default executable icon. See [`assets/README.md`](assets/README.md) for a quick reference.
